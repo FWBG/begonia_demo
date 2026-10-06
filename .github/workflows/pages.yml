@@ -44,12 +44,14 @@ jobs:
       - name: Build both dashboards
         run: |
           python3 build.py
+          python3 build.py --season fall
           python3 build_react.py
 
       - name: Assemble site
         run: |
-          mkdir -p _site/react
+          mkdir -p _site/react _site/fall
           cp begonia_dashboard.html _site/index.html
+          cp begonia_dashboard_fall.html _site/fall/index.html
           cp begonia_dashboard_react.html _site/react/index.html
 
       - uses: actions/upload-pages-artifact@v3

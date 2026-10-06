@@ -75,10 +75,10 @@ def b64(p):
     return base64.b64encode(Path(p).read_bytes()).decode()
 
 
-def fonts_and_tokens():
+def fonts_and_tokens(season=None):
     """Return (font CSS with Satoshi embedded, design-token CSS)."""
     css = ""
-    for f in ("colors", "typography", "spacing", "shape"):
+    for f in ("colors", "typography", "spacing", "shape") + (("seasons",) if season else ()):
         css += (ROOT / f"fwbg/tokens/{f}.css").read_text() + "\n"
     font = ("@import url('https://use.typekit.net/pgm0cqm.css');\n"
             "@font-face{font-family:Satoshi;src:url(data:font/woff2;base64,%s) format('woff2');"
@@ -86,18 +86,33 @@ def fonts_and_tokens():
     return font, css
 
 
-def main():
+# Chart/accent roles per season. Fall: Red Oak header, Sunstone bars, honey highlights.
+# Bars use the darker accent because honey (the fall secondary) is too pale on white for a chart fill.
+SEASON_CSS = {
+    "fall": """[data-season="fall"]{--viz:var(--color-accent-darker);--viz-hover:var(--color-primary-lighter);
+  --viz-selected:var(--color-primary);--eyebrow-color:var(--fwbg-honey);--tag-z:var(--fwbg-honey)}
+""",
+}
+
+
+def main(season=None):
     data = load()
-    font, css = fonts_and_tokens()
+    font, css = fonts_and_tokens(season)
     logo = (ROOT / "fwbg/assets/logo-primary.svg").read_text()
     html = (ROOT / "src/template.html").read_text()
     html = (html.replace("/*__FONTS__*/", font).replace("/*__TOKENS__*/", css)
                 .replace("<!--__LOGO__-->", logo)
                 .replace("__DATA__", json.dumps(data, ensure_ascii=False, separators=(",", ":"))))
-    out = ROOT / "begonia_dashboard.html"
+    if season:
+        html = html.replace('<html lang="en">', f'<html lang="en" data-season="{season}">')
+        html = html.replace("</style>", SEASON_CSS[season] + "</style>", 1)
+    out = ROOT / (f"begonia_dashboard_{season}.html" if season else "begonia_dashboard.html")
     out.write_text(html)
     print(f"{len(data)} plants -> {out.name} ({out.stat().st_size/1024:.0f} KB)")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--season", choices=sorted(SEASON_CSS), help="build a seasonal theme variant")
+    main(ap.parse_args().season)

@@ -8,6 +8,9 @@
 <style>
 /*__FONTS__*/
 /*__TOKENS__*/
+:root{ /* chart/accent roles; a season theme overrides these (see build.py --season) */
+  --viz:var(--color-secondary-dark);--viz-hover:var(--color-accent-dark);--viz-selected:var(--color-primary);
+  --eyebrow-color:var(--fwbg-meadow);--tag-z:var(--fwbg-citrus)}
 *{box-sizing:border-box;margin:0}
 html{font-size:16px}
 body{font-family:var(--font-primary);background:var(--surface-page);color:var(--text-body);line-height:1.45}
@@ -20,7 +23,7 @@ button,input,select{font:inherit;color:inherit}
 header.top{background:var(--color-primary);color:#fff;padding:28px 0 36px}
 header.top .logo{width:150px;display:block;color:#fff;margin-bottom:28px}
 header.top .logo svg{width:100%;height:auto;display:block}
-.eyebrow{font-size:.78rem;letter-spacing:var(--eyebrow-letter-spacing);text-transform:uppercase;font-weight:700;color:var(--fwbg-meadow)}
+.eyebrow{font-size:.78rem;letter-spacing:var(--eyebrow-letter-spacing);text-transform:uppercase;font-weight:700;color:var(--eyebrow-color)}
 h1{font-family:var(--font-display);font-weight:500;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.05;margin:8px 0 12px}
 header.top p{max-width:62ch;color:hsla(0,0%,100%,.85);font-size:1.05rem}
 
@@ -58,10 +61,10 @@ header.top p{max-width:62ch;color:hsla(0,0%,100%,.85);font-size:1.05rem}
 .row:hover{background:var(--color-bg-light)}
 .row .lbl{font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .bar{height:12px;border-radius:6px;background:var(--color-tertiary);overflow:hidden}
-.row .bar i{display:block;height:100%;background:var(--color-secondary-dark);border-radius:6px;transition:width var(--duration-base) var(--ease-out)}
+.row .bar i{display:block;height:100%;background:var(--viz);border-radius:6px;transition:width var(--duration-base) var(--ease-out)}
 .row .n{font-size:.85rem;font-variant-numeric:tabular-nums;min-width:2.6em;text-align:right;color:var(--text-muted)}
 .row[aria-pressed=true]{background:var(--color-tertiary)}
-.row[aria-pressed=true] .bar i{background:var(--color-primary)}
+.row[aria-pressed=true] .bar i{background:var(--viz-selected)}
 .row[aria-pressed=true] .lbl,.row[aria-pressed=true] .n{font-weight:700;color:var(--text-heading)}
 .row.zero{opacity:.45}
 #f-o .row{grid-template-columns:minmax(0,14rem) 1fr auto}
@@ -69,9 +72,9 @@ header.top p{max-width:62ch;color:hsla(0,0%,100%,.85);font-size:1.05rem}
 /* year chart */
 .years{display:flex;align-items:flex-end;gap:3px;height:190px;padding-top:6px}
 .yr{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;border:0;background:none;padding:0;cursor:pointer;position:relative}
-.yr .col{width:100%;background:var(--color-secondary-dark);border-radius:3px 3px 0 0;min-height:1px;transition:height var(--duration-base) var(--ease-out)}
-.yr:hover .col{background:var(--color-accent-dark)}
-.yr[aria-pressed=true] .col{background:var(--color-primary)}
+.yr .col{width:100%;background:var(--viz);border-radius:3px 3px 0 0;min-height:1px;transition:height var(--duration-base) var(--ease-out)}
+.yr:hover .col{background:var(--viz-hover)}
+.yr[aria-pressed=true] .col{background:var(--viz-selected)}
 .yr .cnt{font-size:.68rem;color:var(--text-muted);height:1.1em;font-variant-numeric:tabular-nums}
 .yr[aria-pressed=true] .cnt{color:var(--text-heading);font-weight:700}
 .axis{display:flex;gap:3px;border-top:1.5px solid var(--color-contrast-low);padding-top:4px}
@@ -94,7 +97,7 @@ td.name{font-weight:500;color:var(--text-heading);min-width:14rem}
 td.name em{font-style:italic}
 .tag{display:inline-block;padding:1px 9px;border-radius:var(--radius-full);font-size:.78rem;font-weight:500;background:var(--color-tertiary);color:var(--color-primary)}
 .tag.W{background:var(--fwbg-sunstone);color:var(--fwbg-evergreen)}
-.tag.Z{background:var(--fwbg-citrus);color:var(--fwbg-evergreen)}
+.tag.Z{background:var(--tag-z);color:var(--fwbg-evergreen)}
 .empty{padding:40px 20px;text-align:center;color:var(--text-muted)}
 .more{display:flex;justify-content:center;gap:10px;padding:18px}
 footer{padding:28px 20px 50px;font-size:.82rem;color:var(--text-muted)}
