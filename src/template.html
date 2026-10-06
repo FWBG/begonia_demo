@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Begonia Collection Explorer</title>
+<meta name="description" content="Explore the living Begonia collection at Fort Worth Botanic Garden: search, filter and chart the plants by growth habit, origin and more.">
+<style>
+/*__FONTS__*/
+/*__TOKENS__*/
+*{box-sizing:border-box;margin:0}
+html{font-size:16px}
+body{font-family:var(--font-primary);background:var(--surface-page);color:var(--text-body);line-height:1.45}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--color-accent-dark);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* header */
+header.top{background:var(--color-primary);color:#fff;padding:28px 0 36px}
+header.top .logo{width:150px;display:block;color:#fff;margin-bottom:28px}
+header.top .logo svg{width:100%;height:auto;display:block}
+.eyebrow{font-size:.78rem;letter-spacing:var(--eyebrow-letter-spacing);text-transform:uppercase;font-weight:700;color:var(--fwbg-meadow)}
+h1{font-family:var(--font-display);font-weight:500;font-size:clamp(2.2rem,5vw,3.6rem);line-height:1.05;margin:8px 0 12px}
+header.top p{max-width:62ch;color:hsla(0,0%,100%,.85);font-size:1.05rem}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:-22px}
+.kpi{background:var(--surface-card);border-radius:var(--radius-lg);padding:16px 20px;box-shadow:var(--shadow-sm)}
+.kpi b{display:block;font-size:2rem;line-height:1.1;color:var(--text-heading);font-variant-numeric:tabular-nums}
+.kpi span{font-size:.85rem;color:var(--text-muted)}
+
+/* toolbar */
+.toolbar{position:sticky;top:0;z-index:5;background:var(--surface-page);padding:18px 0 10px;margin-top:10px}
+.search{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search .box{flex:1 1 320px;position:relative}
+.search input{width:100%;padding:12px 16px 12px 44px;border:1.5px solid var(--color-contrast-low);border-radius:var(--radius-full);background:#fff;font-size:1rem}
+.search input:focus{border-color:var(--color-primary)}
+.search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--text-muted)}
+.btn{border:0;border-radius:var(--btn-radius);padding:10px 18px;background:var(--color-primary);color:#fff;font-weight:700;cursor:pointer}
+.btn:hover{background:var(--color-primary-light)}
+.btn.ghost{background:transparent;color:var(--color-primary);box-shadow:inset 0 0 0 1.5px var(--color-primary)}
+.btn.ghost:hover{background:var(--color-tertiary)}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;min-height:0}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--color-primary);color:#fff;border:0;border-radius:var(--radius-full);padding:4px 6px 4px 12px;font-size:.85rem;cursor:pointer}
+.pill i{font-style:normal;background:hsla(0,0%,100%,.2);border-radius:50%;width:18px;height:18px;line-height:18px;text-align:center}
+.pill:hover i{background:var(--color-accent);color:var(--color-primary)}
+
+/* cards & facets */
+.grid{align-items:start;display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin:8px 0 28px}
+.card{background:var(--surface-card);border-radius:var(--radius-lg);padding:18px 20px;box-shadow:var(--shadow-sm);min-width:0}
+.card h2{font-size:1rem;color:var(--text-heading);margin-bottom:2px}
+.card .sub{font-size:.8rem;color:var(--text-muted);margin-bottom:12px}
+.s4{grid-column:span 4}.s5{grid-column:span 5}.s7{grid-column:span 7}.s8{grid-column:span 8}.s12{grid-column:span 12}
+.facet{list-style:none;padding:0;display:flex;flex-direction:column;gap:4px}
+.facet.scroll{max-height:290px;overflow:auto;padding-right:4px}
+.row{display:grid;grid-template-columns:minmax(0,9.5rem) 1fr auto;gap:10px;align-items:center;width:100%;border:0;background:none;padding:5px 6px;border-radius:var(--radius-sm);cursor:pointer;text-align:left}
+.row:hover{background:var(--color-bg-light)}
+.row .lbl{font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .bar{height:12px;border-radius:6px;background:var(--color-tertiary);overflow:hidden}
+.row .bar i{display:block;height:100%;background:var(--color-secondary-dark);border-radius:6px;transition:width var(--duration-base) var(--ease-out)}
+.row .n{font-size:.85rem;font-variant-numeric:tabular-nums;min-width:2.6em;text-align:right;color:var(--text-muted)}
+.row[aria-pressed=true]{background:var(--color-tertiary)}
+.row[aria-pressed=true] .bar i{background:var(--color-primary)}
+.row[aria-pressed=true] .lbl,.row[aria-pressed=true] .n{font-weight:700;color:var(--text-heading)}
+.row.zero{opacity:.45}
+#f-o .row{grid-template-columns:minmax(0,14rem) 1fr auto}
+
+/* year chart */
+.years{display:flex;align-items:flex-end;gap:3px;height:190px;padding-top:6px}
+.yr{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;border:0;background:none;padding:0;cursor:pointer;position:relative}
+.yr .col{width:100%;background:var(--color-secondary-dark);border-radius:3px 3px 0 0;min-height:1px;transition:height var(--duration-base) var(--ease-out)}
+.yr:hover .col{background:var(--color-accent-dark)}
+.yr[aria-pressed=true] .col{background:var(--color-primary)}
+.yr .cnt{font-size:.68rem;color:var(--text-muted);height:1.1em;font-variant-numeric:tabular-nums}
+.yr[aria-pressed=true] .cnt{color:var(--text-heading);font-weight:700}
+.axis{display:flex;gap:3px;border-top:1.5px solid var(--color-contrast-low);padding-top:4px}
+.axis span{flex:1;font-size:.7rem;color:var(--text-muted);text-align:center;min-width:0;overflow:visible;white-space:nowrap}
+
+/* results */
+.results h2{font-family:var(--font-display);font-weight:500;font-size:1.7rem;color:var(--text-heading)}
+.rhead{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tablewrap{background:var(--surface-card);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:left;padding:0;border-bottom:2px solid var(--color-tertiary);white-space:nowrap}
+th button{width:100%;text-align:left;border:0;background:none;padding:12px 14px;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);cursor:pointer}
+th button:hover{color:var(--text-heading)}
+th[aria-sort] button{color:var(--text-heading)}
+th[aria-sort=ascending] button::after{content:" ▲"}
+th[aria-sort=descending] button::after{content:" ▼"}
+td{padding:10px 14px;border-bottom:1px solid var(--color-bg-dark);vertical-align:top}
+tbody tr:hover{background:var(--color-bg-lighter)}
+td.name{font-weight:500;color:var(--text-heading);min-width:14rem}
+td.name em{font-style:italic}
+.tag{display:inline-block;padding:1px 9px;border-radius:var(--radius-full);font-size:.78rem;font-weight:500;background:var(--color-tertiary);color:var(--color-primary)}
+.tag.W{background:var(--fwbg-sunstone);color:var(--fwbg-evergreen)}
+.tag.Z{background:var(--fwbg-citrus);color:var(--fwbg-evergreen)}
+.empty{padding:40px 20px;text-align:center;color:var(--text-muted)}
+.more{display:flex;justify-content:center;gap:10px;padding:18px}
+footer{padding:28px 20px 50px;font-size:.82rem;color:var(--text-muted)}
+footer p+p{margin-top:6px}
+
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}.s4,.s5,.s7,.s8{grid-column:span 12}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="https://fwbg.org" aria-label="Fort Worth Botanic Garden"><!--__LOGO__--></a>
+    <div class="eyebrow">Living collection</div>
+    <h1>Begonia Collection Explorer</h1>
+    <p>Browse the begonias growing in our care. Search by name or country, click any bar or year to filter, and watch every chart and count update.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="kpis" aria-live="polite" aria-label="Summary of the plants shown">
+    <div class="kpi"><b id="k-plants">–</b><span id="k-plants-l">plants shown</span></div>
+    <div class="kpi"><b id="k-species">–</b><span>different species</span></div>
+    <div class="kpi"><b id="k-wild">–</b><span>wild-collected</span></div>
+    <div class="kpi"><b id="k-countries">–</b><span>countries of origin on record</span></div>
+  </section>
+
+  <div class="toolbar">
+    <div class="search">
+      <div class="box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <label class="sr" for="q">Search the collection</label>
+        <input id="q" type="search" placeholder="Search names, countries, accession no." autocomplete="off">
+      </div>
+      <button class="btn ghost" id="clear" hidden>Clear all filters</button>
+    </div>
+    <div class="pills" id="pills" aria-label="Active filters"></div>
+  </div>
+
+  <section class="grid" aria-label="Charts and filters">
+    <div class="card s4"><h2>Growth habit</h2><p class="sub">How the plant grows. Some plants have more than one.</p><ul class="facet" id="f-h"></ul></div>
+    <div class="card s8"><h2>When plants joined the collection</h2><p class="sub">Plants added each year. Click a year to filter.</p><div class="years" id="years"></div><div class="axis" id="axis" aria-hidden="true"></div></div>
+    <div class="card s4"><h2>Where it came from</h2><p class="sub">The history of each plant before it reached us.</p><ul class="facet" id="f-o"></ul></div>
+    <div class="card s4"><h2>How it arrived</h2><ul class="facet" id="f-m"></ul><h2 style="margin-top:18px">Type of name</h2><ul class="facet" id="f-t"></ul></div>
+    <div class="card s4"><h2>Countries of wild origin</h2><p class="sub">Only plants with a recorded collecting country.</p><ul class="facet scroll" id="f-c"></ul><h2 style="margin-top:18px">Native range</h2><ul class="facet" id="f-r"></ul></div>
+  </section>
+
+  <section class="results" aria-label="Plant list">
+    <div class="rhead"><h2>Plants</h2><span id="count" aria-live="polite"></span></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty" hidden>No plants match these filters. Try removing one.</div>
+      <div class="more"><button class="btn" id="more" hidden>Show more</button></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p>Source: Fort Worth Botanic Garden Begonia item report, 28 May 2026. Includes plants currently living in the collection.</p>
+  <p>Origin codes follow standard botanic-garden practice: <b>wild-collected</b> plants came directly from nature; <b>grown from wild-collected</b> plants descend from a wild source plant in cultivation; <b>cultivated</b> plants have a garden origin.</p>
+</footer>
+
+<script>
+const DATA = __DATA__;
+
+const LABELS = {
+  o: {G:"Cultivated (garden origin)", W:"Wild-collected", Z:"Grown from wild-collected plant", U:"Origin unknown"},
+};
+const FACETS = [
+  {k:"h", el:"f-h", multi:true,  title:"Growth habit"},
+  {k:"o", el:"f-o", title:"Origin", label:v=>LABELS.o[v]},
+  {k:"m", el:"f-m", title:"How it arrived"},
+  {k:"t", el:"f-t", title:"Type of name"},
+  {k:"c", el:"f-c", title:"Country", skipEmpty:true},
+  {k:"r", el:"f-r", title:"Native range"},
+  {k:"y", el:"years", title:"Year added", num:true},
+];
+const state = {q:"", sel:{}, sort:{key:"n", dir:1}, shown:50};
+FACETS.forEach(f => state.sel[f.k] = new Set());
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => n.toLocaleString();
+const vals = (d, f) => f.multi ? d[f.k] : [d[f.k]];
+
+// precompute searchable text
+DATA.forEach(d => d._s = [d.n, d.s, d.c, d.a, d.h.join(" ")].join(" ").toLowerCase());
+
+function matches(d, skip) {
+  if (state.q) { for (const w of state.q.split(/\s+/)) if (!d._s.includes(w)) return false; }
+  for (const f of FACETS) {
+    if (f.k === skip) continue;
+    const s = state.sel[f.k];
+    if (s.size && !vals(d, f).some(v => s.has(String(v)))) return false;
+  }
+  return true;
+}
+
+function toggle(k, v) {
+  const s = state.sel[k];
+  s.has(v) ? s.delete(v) : s.add(v);
+  state.shown = 50; update();
+}
+
+function renderFacet(f) {
+  const pool = DATA.filter(d => matches(d, f.k));       // ignore own selection so options stay visible
+  const counts = new Map();
+  pool.forEach(d => vals(d, f).forEach(v => { if (v !== "" ) counts.set(String(v), (counts.get(String(v)) || 0) + 1); }));
+  state.sel[f.k].forEach(v => { if (!counts.has(v)) counts.set(v, 0); });
+  if (f.k === "y") return renderYears(counts);
+  // keep a stable order from the full data set
+  const all = new Map();
+  DATA.forEach(d => vals(d, f).forEach(v => { if (v !== "") all.set(String(v), (all.get(String(v)) || 0) + 1); }));
+  let keys = [...all.keys()].sort((a, b) => all.get(b) - all.get(a));
+  if (f.k === "o") keys = ["G","U","W","Z"].filter(k => all.has(k));
+  const max = Math.max(1, ...keys.map(k => counts.get(k) || 0));
+  $(f.el).innerHTML = keys.map(k => {
+    const n = counts.get(k) || 0, lab = esc(f.label ? f.label(k) : k);
+    return `<li><button class="row${n ? "" : " zero"}" data-k="${f.k}" data-v="${esc(k)}" aria-pressed="${state.sel[f.k].has(k)}" title="${lab}: ${fmt(n)}">
+      <span class="lbl">${lab}</span><span class="bar"><i style="width:${n / max * 100}%"></i></span><span class="n">${fmt(n)}</span></button></li>`;
+  }).join("");
+}
+
+const Y0 = Math.min(...DATA.map(d => d.y)), Y1 = Math.max(...DATA.map(d => d.y));
+function renderYears(counts) {
+  const ys = []; for (let y = Y0; y <= Y1; y++) ys.push(y);
+  const max = Math.max(1, ...ys.map(y => counts.get(String(y)) || 0));
+  $("years").innerHTML = ys.map(y => {
+    const n = counts.get(String(y)) || 0;
+    return `<button class="yr" data-k="y" data-v="${y}" aria-pressed="${state.sel.y.has(String(y))}" title="${y}: ${fmt(n)} plants" aria-label="${y}: ${fmt(n)} plants">
+      <span class="cnt">${n || ""}</span><span class="col" style="height:${n / max * 150}px"></span></button>`;
+  }).join("");
+  $("axis").innerHTML = ys.map(y => `<span>${(y - Y0) % 5 === 0 || y === Y1 ? y : ""}</span>`).join("");
+}
+
+function renderKPIs(rows) {
+  $("k-plants").textContent = fmt(rows.length);
+  $("k-plants-l").textContent = rows.length === DATA.length ? "plants in the collection" : `plants shown (of ${fmt(DATA.length)})`;
+  $("k-species").textContent = fmt(new Set(rows.map(d => d.s).filter(Boolean)).size);
+  $("k-wild").textContent = fmt(rows.filter(d => d.o === "W").length);
+  $("k-countries").textContent = fmt(new Set(rows.map(d => d.c).filter(Boolean)).size);
+}
+
+function renderPills() {
+  const out = [];
+  if (state.q) out.push(["q", "", `Search: “${state.q}”`]);
+  FACETS.forEach(f => state.sel[f.k].forEach(v => out.push([f.k, v, `${f.title}: ${f.label ? f.label(v) : v}`])));
+  $("pills").innerHTML = out.map(([k, v, t]) => `<button class="pill" data-k="${k}" data-v="${esc(v)}">${esc(t)} <i aria-hidden="true">×</i><span class="sr">remove</span></button>`).join("");
+  $("clear").hidden = !out.length;
+}
+
+const COLS = [
+  {k:"n", t:"Name"}, {k:"h", t:"Growth habit"}, {k:"o", t:"Origin"},
+  {k:"c", t:"Country"}, {k:"r", t:"Native range"}, {k:"y", t:"Added"},
+];
+$("thead").innerHTML = COLS.map(c => `<th scope="col" data-k="${c.k}"><button>${c.t}</button></th>`).join("");
+
+const nameHTML = n => esc(n).replace(/^(Begonia(?: [a-z][a-z-]+)?)/, "<em>$1</em>");
+const sortKey = (d, k) => k === "h" ? d.h.join(",") : (d[k] === "" ? "￿" : d[k]);
+
+function renderTable(rows) {
+  const {key, dir} = state.sort;
+  rows = rows.slice().sort((a, b) => {
+    const x = sortKey(a, key), y = sortKey(b, key);
+    return (x < y ? -1 : x > y ? 1 : a.n.localeCompare(b.n)) * dir;
+  });
+  const page = rows.slice(0, state.shown);
+  $("tbody").innerHTML = page.map(d => `<tr><td class="name">${nameHTML(d.n)}</td><td>${esc(d.h.join(", "))}</td>
+    <td><span class="tag ${d.o}">${esc(LABELS.o[d.o])}</span></td><td>${esc(d.c || "—")}</td><td>${esc(d.r)}</td><td>${d.y}</td></tr>`).join("");
+  document.querySelectorAll("#thead th").forEach(th => {
+    th.removeAttribute("aria-sort");
+    if (th.dataset.k === key) th.setAttribute("aria-sort", dir > 0 ? "ascending" : "descending");
+  });
+  $("empty").hidden = rows.length > 0;
+  $("more").hidden = rows.length <= state.shown;
+  $("more").textContent = `Show more (${fmt(rows.length - state.shown)} remaining)`;
+  $("count").textContent = `Showing ${fmt(page.length)} of ${fmt(rows.length)} plants`;
+}
+
+function update() {
+  const rows = DATA.filter(d => matches(d));
+  renderKPIs(rows); renderPills(); FACETS.forEach(renderFacet); renderTable(rows);
+  saveHash();
+}
+
+/* shareable URL state */
+function saveHash() {
+  const p = new URLSearchParams();
+  if (state.q) p.set("q", state.q);
+  FACETS.forEach(f => { if (state.sel[f.k].size) p.set(f.k, [...state.sel[f.k]].join("|")); });
+  try { history.replaceState(null, "", p.toString() ? "#" + p : location.pathname + location.search); } catch (e) {}
+}
+function loadHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  state.q = (p.get("q") || "").toLowerCase();
+  $("q").value = p.get("q") || "";
+  FACETS.forEach(f => { if (p.get(f.k)) p.get(f.k).split("|").forEach(v => state.sel[f.k].add(v)); });
+}
+
+/* events */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-k]");
+  if (!t) return;
+  if (t.closest("#thead")) {
+    state.sort = {key: t.dataset.k, dir: state.sort.key === t.dataset.k ? -state.sort.dir : 1};
+    return update();
+  }
+  if (t.dataset.k === "q") { state.q = ""; $("q").value = ""; state.shown = 50; return update(); }
+  toggle(t.dataset.k, t.dataset.v);
+});
+$("q").addEventListener("input", e => { state.q = e.target.value.trim().toLowerCase(); state.shown = 50; update(); });
+$("more").addEventListener("click", () => { state.shown += 100; update(); });
+$("clear").addEventListener("click", () => {
+  state.q = ""; $("q").value = ""; FACETS.forEach(f => state.sel[f.k].clear()); state.shown = 50; update();
+});
+window.addEventListener("hashchange", () => { FACETS.forEach(f => state.sel[f.k].clear()); loadHash(); update(); });
+
+loadHash(); update();
+</script>
+</body>
+</html>
