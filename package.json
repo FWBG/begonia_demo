@@ -1,0 +1,8 @@
+{
+  "name": "begonia-demo",
+  "private": true,
+  "description": "Build tooling for the React version of the Begonia dashboard",
+  "scripts": { "build:react": "python3 build_react.py" },
+  "dependencies": { "react": "^19.0.0", "react-dom": "^19.0.0" },
+  "devDependencies": { "esbuild": "^0.25.0" }
+}
